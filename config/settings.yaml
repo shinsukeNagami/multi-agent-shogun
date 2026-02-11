@@ -21,6 +21,14 @@ screenshot:
   # WSL側パス（実際に使用）
   path: "/mnt/c/Users/{{USERNAME}}/Pictures/Screenshots"
 
+# セキュリティ設定
+security:
+  # --dangerously-skip-permissions の使用（デフォルト: false）
+  # true にすると全エージェントがパーミッション確認なしで実行される
+  # ⚠ 複数エージェント同時起動時は誤実行の被害が増幅するリスクあり
+  # CLI: -d / --dangerous  または  環境変数: ALLOW_DANGEROUS=1 でも有効化可能
+  dangerous_mode: false
+
 # ログ設定
 logging:
   level: info  # debug | info | warn | error

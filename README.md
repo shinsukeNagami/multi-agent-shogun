@@ -582,9 +582,21 @@ tmux attach-session -t shogun     # Connect to give commands
 ./shutsujin_departure.sh -s       # Create sessions only
 
 # Manually start Claude Code on specific agents
-tmux send-keys -t shogun:0 'claude --dangerously-skip-permissions' Enter
-tmux send-keys -t multiagent:0.0 'claude --dangerously-skip-permissions' Enter
+tmux send-keys -t shogun:0 'claude' Enter
+tmux send-keys -t multiagent:0.0 'claude' Enter
 ```
+
+**Permission Skip Mode (use with caution):**
+```bash
+# Method 1: CLI flag
+./shutsujin_departure.sh -d
+
+# Method 2: Environment variable
+ALLOW_DANGEROUS=1 ./shutsujin_departure.sh
+```
+> **Warning**: Enabling `--dangerously-skip-permissions` means 10 agents run
+> simultaneously without permission checks. Mistakes are amplified.
+> Only use in trusted environments.
 
 **Restart After Crash:**
 ```bash
@@ -657,10 +669,14 @@ mcp__memory__read_graph()  ← Works!
 <details>
 <summary><b>Agents asking for permissions?</b></summary>
 
-Make sure to start with `--dangerously-skip-permissions`:
+Start with the `-d` flag to enable permission skipping:
 
 ```bash
-claude --dangerously-skip-permissions --system-prompt "..."
+# Via CLI flag
+./shutsujin_departure.sh -d
+
+# Or via environment variable
+ALLOW_DANGEROUS=1 ./shutsujin_departure.sh
 ```
 
 </details>

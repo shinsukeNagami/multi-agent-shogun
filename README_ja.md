@@ -588,9 +588,21 @@ tmux attach-session -t shogun     # 接続してコマンドを出す
 ./shutsujin_departure.sh -s       # セッションのみ作成
 
 # 特定のエージェントでClaude Codeを手動起動
-tmux send-keys -t shogun:0 'claude --dangerously-skip-permissions' Enter
-tmux send-keys -t multiagent:0.0 'claude --dangerously-skip-permissions' Enter
+tmux send-keys -t shogun:0 'claude' Enter
+tmux send-keys -t multiagent:0.0 'claude' Enter
 ```
+
+**パーミッションスキップモード（⚠ リスクあり）：**
+```bash
+# 方法1: CLI フラグ
+./shutsujin_departure.sh -d
+
+# 方法2: 環境変数
+ALLOW_DANGEROUS=1 ./shutsujin_departure.sh
+```
+> **注意**: `--dangerously-skip-permissions` を有効にすると、10エージェントが同時に
+> パーミッション確認なしで実行されます。誤実行時の被害が増幅するリスクがあるため、
+> 信頼できる環境でのみ使用してください。
 
 **クラッシュ後の再起動：**
 ```bash
@@ -676,10 +688,14 @@ mcp__memory__read_graph()  ← 動作！
 <details>
 <summary><b>エージェントが権限を求めてくる？</b></summary>
 
-`--dangerously-skip-permissions` 付きで起動していることを確認：
+`-d` フラグ付きで起動していることを確認：
 
 ```bash
-claude --dangerously-skip-permissions --system-prompt "..."
+# 出陣スクリプトで有効化
+./shutsujin_departure.sh -d
+
+# または環境変数で有効化
+ALLOW_DANGEROUS=1 ./shutsujin_departure.sh
 ```
 
 </details>

@@ -38,6 +38,13 @@ log_war() {
 SETUP_ONLY=false
 OPEN_TERMINAL=false
 
+# --dangerously-skip-permissions の制御
+# デフォルト無効。ALLOW_DANGEROUS=1 で明示的に有効化
+CLAUDE_DANGEROUS_FLAG=""
+if [ "${ALLOW_DANGEROUS:-0}" = "1" ]; then
+    CLAUDE_DANGEROUS_FLAG="--dangerously-skip-permissions"
+fi
+
 while [[ $# -gt 0 ]]; do
     case $1 in
         -s|--setup-only)
@@ -46,6 +53,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -t|--terminal)
             OPEN_TERMINAL=true
+            shift
+            ;;
+        -d|--dangerous)
+            CLAUDE_DANGEROUS_FLAG="--dangerously-skip-permissions"
             shift
             ;;
         -h|--help)
@@ -57,7 +68,11 @@ while [[ $# -gt 0 ]]; do
             echo "オプション:"
             echo "  -s, --setup-only  tmuxセッションのセットアップのみ（Claude起動なし）"
             echo "  -t, --terminal    Windows Terminal で新しいタブを開く"
+            echo "  -d, --dangerous   --dangerously-skip-permissions を有効化（⚠ リスクあり）"
             echo "  -h, --help        このヘルプを表示"
+            echo ""
+            echo "環境変数:"
+            echo "  ALLOW_DANGEROUS=1  -d と同等（--dangerously-skip-permissions 有効化）"
             echo ""
             echo "例:"
             echo "  ./shutsujin_departure.sh      # 全エージェント起動（通常の出陣）"
@@ -338,7 +353,7 @@ if [ "$SETUP_ONLY" = false ]; then
     log_war "👑 全軍に Claude Code を召喚中..."
 
     # 将軍
-    tmux send-keys -t shogun "MAX_THINKING_TOKENS=0 claude --model opus --dangerously-skip-permissions"
+    tmux send-keys -t shogun "MAX_THINKING_TOKENS=0 claude --model opus $CLAUDE_DANGEROUS_FLAG"
     tmux send-keys -t shogun Enter
     log_info "  └─ 将軍、召喚完了"
 
@@ -347,7 +362,7 @@ if [ "$SETUP_ONLY" = false ]; then
 
     # 家老 + 足軽（9ペイン）
     for i in {0..8}; do
-        tmux send-keys -t "multiagent:0.$i" "claude --dangerously-skip-permissions"
+        tmux send-keys -t "multiagent:0.$i" "claude $CLAUDE_DANGEROUS_FLAG"
         tmux send-keys -t "multiagent:0.$i" Enter
     done
     log_info "  └─ 家老・足軽、召喚完了"
@@ -500,13 +515,15 @@ if [ "$SETUP_ONLY" = true ]; then
     echo "  手動でClaude Codeを起動するには:"
     echo "  ┌──────────────────────────────────────────────────────────┐"
     echo "  │  # 将軍を召喚                                            │"
-    echo "  │  tmux send-keys -t shogun 'claude --dangerously-skip-permissions' Enter │"
+    echo "  │  tmux send-keys -t shogun 'claude' Enter                  │"
     echo "  │                                                          │"
     echo "  │  # 家老・足軽を一斉召喚                                   │"
     echo "  │  for i in {0..8}; do \\                                   │"
-    echo "  │    tmux send-keys -t multiagent:0.\$i \\                   │"
-    echo "  │      'claude --dangerously-skip-permissions' Enter       │"
+    echo "  │    tmux send-keys -t multiagent:0.\$i 'claude' Enter     │"
     echo "  │  done                                                    │"
+    echo "  │                                                          │"
+    echo "  │  # ⚠ パーミッションスキップが必要な場合:                   │"
+    echo "  │  ALLOW_DANGEROUS=1 ./shutsujin_departure.sh              │"
     echo "  └──────────────────────────────────────────────────────────┘"
     echo ""
 fi
